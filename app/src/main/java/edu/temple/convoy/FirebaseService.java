@@ -35,43 +35,63 @@ public class FirebaseService extends FirebaseMessagingService {
         //intent.putExtra("location", remoteMessage.getData().toString());
         //broadcaster.sendBroadcast(intent);
 
+
         Log.d("TAG", "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
-            //json
-            String json = "{\"action\":\"UPDATE\", \"data\":[{\"username\":\"user1\", \"firstname\":\"firstname1\", \"lastname\":\"lastname1\", \"latitude\":72.3456, \"longitude\":125.345356}, {\"username\":\"user2\", \"firstname\":\"firstname2\", \"lastname\":\"lastname2\", \"latitude\":72.4434, \"longitude\":125.27543}, {\"username\":\"user3\", \"firstname\":\"firstname3\", \"lastname\":\"lastname3\", \"latitude\":72.42434, \"longitude\":125.25683}]}";
-            String[] payloading = remoteMessage.getData().toString().split("=");
-            Intent passing = new Intent("GPS");
+            String messaging = remoteMessage.getData().get("payload");
+            if(messaging.contains("MESSAGE")){
+                Intent passing = new Intent("GPS");
+                try {
+                    JSONObject jobj = new JSONObject(messaging);
+                        passing.putExtra("firstname", jobj.get("username").toString());
+                        passing.putExtra("messages", jobj.get("message_file").toString());
+                    passing.putExtra("message", "record");
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(passing);
 
-            try {
-
-                JSONObject jobj =  new JSONObject(payloading[1]);
-                String jsonConvert = jobj.getString("data");
-                JSONArray jsonArray = new JSONArray(jsonConvert);
-                for(int i = 0; i < jsonArray.length(); i++){
-                    String jsonArrayConvert = jsonArray.getString(i);
-                    JSONObject jobjDetail =  new JSONObject(jsonArrayConvert);
-                    passing.putExtra("firstname",jobjDetail.get("username").toString());
-                    passing.putExtra("latitude",jobjDetail.get("latitude").toString());
-                    passing.putExtra("longitude",jobjDetail.get("longitude").toString());
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(passing);
-
-                    Log.d("TAG4", "MHEY LISTEN: " + jobjDetail.get("longitude"));
+                        //Log.d("TAG4", "MHEY LISTEN: " + jobj.get("message_file").toString());
+                    } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
 
-            Log.d("TAG3", "Message data payload: " + remoteMessage.getData());
+               // Log.d("TAG4", "MHEY LISsdaasdfdsaTEN: " + jobjDetail.get("longitude"));
+            }else {
+                //json
+                String[] payloading = remoteMessage.getData().toString().split("=");
+                Intent passing = new Intent("GPS");
 
-            if (/* Check if data needs to be processed by long running job */ true) {
-                // For long-running tasks (10 seconds or more) use WorkManager.
-                //  scheduleJob();
-            } else {
-                // Handle message within 10 seconds
-                // handleNow();
+                try {
+
+                    JSONObject jobj = new JSONObject(payloading[1]);
+                    String jsonConvert = jobj.getString("data");
+                    JSONArray jsonArray = new JSONArray(jsonConvert);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String jsonArrayConvert = jsonArray.getString(i);
+                        JSONObject jobjDetail = new JSONObject(jsonArrayConvert);
+                        passing.putExtra("firstname", jobjDetail.get("username").toString());
+                        passing.putExtra("latitude", jobjDetail.get("latitude").toString());
+                        passing.putExtra("longitude", jobjDetail.get("longitude").toString());
+                        passing.putExtra("message", "update");
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(passing);
+
+                        Log.d("TAG4", "MHEY LISTEN: " + jobjDetail.get("longitude"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+                Log.d("TAG3", "Message data payload: " + remoteMessage.getData());
+
+                if (/* Check if data needs to be processed by long running job */ true) {
+                    // For long-running tasks (10 seconds or more) use WorkManager.
+                    //  scheduleJob();
+                } else {
+                    // Handle message within 10 seconds
+                    // handleNow();
+                }
             }
 
         }

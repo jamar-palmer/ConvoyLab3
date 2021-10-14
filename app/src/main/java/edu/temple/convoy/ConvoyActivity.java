@@ -21,6 +21,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -64,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -89,11 +91,13 @@ public class ConvoyActivity extends FragmentActivity implements OnMapReadyCallba
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
+            if(intent.getStringExtra("message").contains("update")){
             String message = intent.getStringExtra("firstname");
             double latt = Double.valueOf(intent.getStringExtra("latitude"));
             double longg = Double.valueOf(intent.getStringExtra("longitude"));
             LatLng latLng2 = new LatLng(latt,longg);
             otherUsers(message, latLng2);
+            }
         }
     };
 
@@ -307,6 +311,7 @@ public class ConvoyActivity extends FragmentActivity implements OnMapReadyCallba
     }
 
     public void leaveConvoy(){
+
         String convoy = "https://kamorris.com/lab/convoy/convoy.php";
         StringRequest strRequest = new StringRequest(Request.Method.POST, convoy,
                 new Response.Listener<String>()
@@ -326,6 +331,15 @@ public class ConvoyActivity extends FragmentActivity implements OnMapReadyCallba
                             editor.apply();
                             textView.setText(" ");
                             startJoin = " ";
+
+                            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
+                            Log.d("tag12312", "MHEY LISTEN: " + path);
+                            String[] dFiles = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).list();
+                            File file = new File(path);
+                            for (int i=0; i<dFiles.length; i++) {
+                                File myFile = new File(file, dFiles[i]);
+                                myFile.delete();
+                            }
                             Toast.makeText(ConvoyActivity.this, "You Hava Ended This Convoy", Toast.LENGTH_SHORT).show();
 
                         }else{
@@ -364,6 +378,7 @@ public class ConvoyActivity extends FragmentActivity implements OnMapReadyCallba
     }
 
     public void endingConvoy(){
+
         String convoy = "https://kamorris.com/lab/convoy/convoy.php";
         StringRequest strRequest = new StringRequest(Request.Method.POST, convoy,
                 new Response.Listener<String>()
@@ -383,6 +398,23 @@ public class ConvoyActivity extends FragmentActivity implements OnMapReadyCallba
                             editor.apply();
                             textView.setText(" ");
                             startJoin = " ";
+
+                            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
+
+                            String[] dFiles = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).list();
+                            File file = new File(path);
+                            for (int i=0; i<dFiles.length; i++) {
+                                File myFile = new File(file, dFiles[i]);
+                                myFile.delete();
+
+                            }
+
+                            if (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).isDirectory())
+                                for (File child : Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).listFiles())
+                                    child.delete();
+
+
+
                             Toast.makeText(ConvoyActivity.this, "You Hava Left This Convoy", Toast.LENGTH_SHORT).show();
 
                         }else{
